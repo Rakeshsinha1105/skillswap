@@ -11,7 +11,7 @@ const reviewRoutes = require('./routes/reviews');
 const app = express();
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://skillswap-mu-neon.vercel.app',
+  origin: process.env.CLIENT_URL || 'https://skillswap-rks.vercel.app',
 }));
 app.use(express.json());
 
