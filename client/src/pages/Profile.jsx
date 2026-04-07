@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getUser, createSkill, deleteSkill, respondToRequest, getMyRequests } from '../api';
+import { getUser, createSkill, deleteSkill, respondToRequest, getMyRequests, getUserReviews } from '../api';
 import SkillCard from '../components/SkillCard';
 import SwapModal from '../components/SwapModal';
+import ReviewModal from '../components/ReviewModal';
 
 const CATEGORIES = ['Programming', 'Design', 'Music', 'Language', 'Cooking', 'Fitness', 'Writing', 'Other'];
 
@@ -28,6 +29,8 @@ export default function Profile() {
   const [user, setUser] = useState(null);
   const [swapTarget, setSwapTarget] = useState(null);
   const [swapRequests, setSwapRequests] = useState([]);
+  const [reviewTarget, setReviewTarget] = useState(null); // { swap, revieweeId, revieweeName }
+  const [reviewedSwapIds, setReviewedSwapIds] = useState([]);
   const [newSkill, setNewSkill] = useState({ title: '', category: '', type: 'offer', description: '' });
   const [showSkillForm, setShowSkillForm] = useState(false);
   const [activeTab, setActiveTab] = useState('skills');
@@ -40,6 +43,7 @@ export default function Profile() {
     loadUser();
     if (isOwner) {
       getMyRequests().then((r) => setSwapRequests(r.data)).catch(() => {});
+      getUserReviews(myId).then((r) => setReviewedSwapIds(r.data.map((rev) => rev.swapId))).catch(() => {});
     }
   }, [id]);
 
@@ -343,7 +347,7 @@ export default function Profile() {
                         Accepted
                       </span>
                     </div>
-                    <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                    <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 flex items-center gap-3 mb-3">
                       <span className="text-indigo-500 text-lg">✉</span>
                       <div>
                         <p className="text-xs text-indigo-500 font-medium">Contact via email</p>
@@ -355,6 +359,16 @@ export default function Profile() {
                         </a>
                       </div>
                     </div>
+                    {reviewedSwapIds.includes(req.id) ? (
+                      <p className="text-xs text-emerald-600 font-medium">✓ You have reviewed this swap</p>
+                    ) : (
+                      <button
+                        onClick={() => setReviewTarget({ swap: req, revieweeId: otherUser.id, revieweeName: otherUser.name })}
+                        className="w-full py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-sm font-semibold rounded-xl hover:from-amber-600 hover:to-orange-600 transition"
+                      >
+                        Leave a Review
+                      </button>
+                    )}
                   </div>
                 );
               })}
@@ -403,6 +417,20 @@ export default function Profile() {
           targetUser={swapTarget.targetUser}
           targetSkill={swapTarget.targetSkill}
           onClose={() => setSwapTarget(null)}
+        />
+      )}
+
+      {/* Review Modal */}
+      {reviewTarget && (
+        <ReviewModal
+          swap={reviewTarget.swap}
+          revieweeId={reviewTarget.revieweeId}
+          revieweeName={reviewTarget.revieweeName}
+          onClose={() => setReviewTarget(null)}
+          onDone={() => {
+            setReviewedSwapIds((prev) => [...prev, reviewTarget.swap.id]);
+            setReviewTarget(null);
+          }}
         />
       )}
     </div>
