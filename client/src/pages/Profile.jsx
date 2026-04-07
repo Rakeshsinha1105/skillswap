@@ -75,12 +75,14 @@ export default function Profile() {
   }
 
   const pending = swapRequests.filter((r) => r.status === 'pending' && r.receiverId === myId);
+  const accepted = swapRequests.filter((r) => r.status === 'accepted');
   const offerSkills = user.skills.filter((s) => s.type === 'offer');
   const wantSkills = user.skills.filter((s) => s.type === 'want');
 
   const tabs = [
     { key: 'skills', label: `Skills (${user.skills.length})` },
     ...(isOwner ? [{ key: 'requests', label: `Requests${pending.length > 0 ? ` (${pending.length})` : ''}` }] : []),
+    ...(isOwner ? [{ key: 'accepted', label: `Accepted${accepted.length > 0 ? ` (${accepted.length})` : ''}` }] : []),
     { key: 'reviews', label: `Reviews (${user.reviewsReceived?.length || 0})` },
   ];
 
@@ -308,6 +310,54 @@ export default function Profile() {
                   </div>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Tab: Accepted Swaps */}
+      {activeTab === 'accepted' && isOwner && (
+        <div>
+          {accepted.length === 0 ? (
+            <div className="text-center py-12 text-slate-400">
+              <p className="text-4xl mb-3">🤝</p>
+              <p>No accepted swaps yet.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {accepted.map((req) => {
+                const otherUser = req.senderId === myId ? req.receiver : req.sender;
+                return (
+                  <div key={req.id} className="card p-4">
+                    <div className="flex items-center gap-3 mb-3">
+                      <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${getGradient(otherUser.name)} flex items-center justify-center font-bold text-white`}>
+                        {otherUser.name[0].toUpperCase()}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-800">{otherUser.name}</p>
+                        <p className="text-xs text-slate-500">
+                          {req.offeredSkill.title} ↔ {req.wantedSkill.title}
+                        </p>
+                      </div>
+                      <span className="ml-auto text-xs font-semibold px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full">
+                        Accepted
+                      </span>
+                    </div>
+                    <div className="bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3 flex items-center gap-3">
+                      <span className="text-indigo-500 text-lg">✉</span>
+                      <div>
+                        <p className="text-xs text-indigo-500 font-medium">Contact via email</p>
+                        <a
+                          href={`mailto:${otherUser.email}`}
+                          className="text-sm font-semibold text-indigo-700 hover:underline"
+                        >
+                          {otherUser.email}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

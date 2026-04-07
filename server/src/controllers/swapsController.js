@@ -7,8 +7,8 @@ async function getMyRequests(req, res) {
       OR: [{ senderId: req.userId }, { receiverId: req.userId }],
     },
     include: {
-      sender: { select: { id: true, name: true, avatarUrl: true } },
-      receiver: { select: { id: true, name: true, avatarUrl: true } },
+      sender: { select: { id: true, name: true, avatarUrl: true, email: true } },
+      receiver: { select: { id: true, name: true, avatarUrl: true, email: true } },
       offeredSkill: true,
       wantedSkill: true,
     },
